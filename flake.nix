@@ -90,6 +90,7 @@
               binaryen # required for release compilation
               myPkgs.leptosfmt
               stylance-cli # bundle sass
+              wasm-pack # to test wasm
             ];
           };
       }
