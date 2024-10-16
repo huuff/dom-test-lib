@@ -1,4 +1,7 @@
 mod dom_macro;
+mod mount;
+
+pub use mount::*;
 
 use wasm_bindgen::JsCast;
 
@@ -9,23 +12,6 @@ use wasm_bindgen::JsCast;
 /// copied it off one of their examples.
 pub async fn next_tick() {
     gloo_timers::future::TimeoutFuture::new(25).await;
-}
-
-/// Creates, mounts a view into the document for testing. Returns an element that contains the view.
-///
-/// This helps keeping the view self-contained and tries to prevent interacting with other elements.
-pub fn mount_test<F, V>(f: F) -> web_sys::Element
-where
-    F: FnOnce() -> V + 'static,
-    V: leptos::IntoView,
-{
-    let document = leptos::document();
-    let test_wrapper = document.create_element("section").unwrap();
-    let _ = document.body().unwrap().append_child(&test_wrapper);
-
-    leptos::mount_to(test_wrapper.clone().unchecked_into(), f);
-
-    test_wrapper
 }
 
 #[extend::ext(name = HtmlSelectElementExt)]
