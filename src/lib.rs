@@ -21,25 +21,17 @@ pub fn mount_test_wrapper() -> web_sys::Element {
 }
 
 #[extend::ext(name = HtmlSelectElementExt)]
-impl web_sys::HtmlSelectElement {
+pub impl web_sys::HtmlSelectElement {
     /// Selects an option by value and ensures the change is appropriately propagated.
     ///
     /// panics if the option doesn't exist
     fn select_option(&self, val: &str) {
-        // TODO a helper function that converts a NodeList to an element vector
-        let opts = self.query_selector_all("option").unwrap();
-        let mut found = false;
-        for i in 0..opts.length() {
-            let element = opts
-                .get(i)
-                .unwrap()
-                .unchecked_into::<web_sys::HtmlOptionElement>();
-            if element.value() == val {
-                found = true;
-            }
-        }
+        let opts = self
+            .query_selector_all("option")
+            .unwrap()
+            .to_elem_vec::<web_sys::HtmlOptionElement>();
 
-        if !found {
+        if !opts.iter().any(|opt| opt.value() == val) {
             panic!("option with value `{val}` not found");
         }
 
@@ -50,6 +42,20 @@ impl web_sys::HtmlSelectElement {
             &web_sys::Event::new_with_event_init_dict("change", &event_init).unwrap(),
         )
         .unwrap();
+    }
+}
+
+#[extend::ext(name = NodeListExt)]
+pub impl web_sys::NodeList {
+    fn to_elem_vec<Elem: wasm_bindgen::JsCast>(&self) -> Vec<Elem> {
+        let mut res = Vec::with_capacity(self.length() as usize);
+
+        for i in 0..self.length() {
+            let elem = self.get(i).unwrap().unchecked_into::<Elem>();
+            res.push(elem);
+        }
+
+        res
     }
 }
 
