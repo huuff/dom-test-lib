@@ -53,13 +53,24 @@ impl web_sys::HtmlSelectElement {
     }
 }
 
+#[macro_export]
+macro_rules! dom {
+    ($wrapper:ident, with $selector:literal) => {
+        $wrapper.query_selector($selector).unwrap().unwrap()
+    };
+    ($wrapper:ident, with $selector:literal as <$elem:ident>) => {
+        paste::paste! {
+            $wrapper.query_selector($selector).unwrap().unwrap().unchecked_into::<web_sys::[<Html $elem:camel Element>]>()
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use leptos::*;
     use wasm_bindgen::JsCast;
     use wasm_bindgen_test::*;
-    use web_sys::HtmlSelectElement;
 
     wasm_bindgen_test_configure!(run_in_browser);
 
@@ -78,11 +89,7 @@ mod tests {
             }
         });
 
-        let select = test_wrapper
-            .query_selector("select")
-            .unwrap()
-            .unwrap()
-            .unchecked_into::<HtmlSelectElement>();
+        let select = dom!(test_wrapper, with "select" as <select>);
         assert_eq!(select.value(), "");
 
         select.select_option("2");
@@ -106,11 +113,7 @@ mod tests {
             }
         });
 
-        let select = test_wrapper
-            .query_selector("select")
-            .unwrap()
-            .unwrap()
-            .unchecked_into::<HtmlSelectElement>();
+        let select = dom!(test_wrapper, with "select" as <select>);
 
         select.select_option("4");
     }
