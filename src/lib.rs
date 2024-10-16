@@ -11,14 +11,20 @@ pub async fn next_tick() {
     gloo_timers::future::TimeoutFuture::new(25).await;
 }
 
-/// Creates, mounts into the document and returns a new element that can be used for a test
+/// Creates, mounts a view into the document for testing. Returns an element that contains the view.
 ///
-/// Using this element we can add any test elements to it without contaminating the global document
-/// and keep the test self-enclosed.
-pub fn mount_test_wrapper() -> web_sys::Element {
+/// This helps keeping the view self-contained and tries to prevent interacting with other elements.
+pub fn mount_test<F, V>(f: F) -> web_sys::Element
+where
+    F: FnOnce() -> V + 'static,
+    V: leptos::IntoView,
+{
     let document = leptos::document();
     let test_wrapper = document.create_element("section").unwrap();
     let _ = document.body().unwrap().append_child(&test_wrapper);
+
+    leptos::mount_to(test_wrapper.clone().unchecked_into(), f);
+
     test_wrapper
 }
 
@@ -72,9 +78,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn selects_option() {
-        let test_wrapper = mount_test_wrapper();
-
-        mount_to(test_wrapper.clone().unchecked_into(), || {
+        let test_wrapper = mount_test(|| {
             view! {
                 <select>
                     <option value="">none</option>
@@ -96,9 +100,7 @@ mod tests {
     #[should_panic]
     #[wasm_bindgen_test]
     fn panics_on_not_found() {
-        let test_wrapper = mount_test_wrapper();
-
-        mount_to(test_wrapper.clone().unchecked_into(), || {
+        let test_wrapper = mount_test(|| {
             view! {
                 <select>
                     <option value="">none</option>
