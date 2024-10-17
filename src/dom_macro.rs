@@ -15,10 +15,10 @@ macro_rules! dom {
         assert!($wrapper.query_selector($selector).unwrap().is_none());
     };
     ($wrapper:ident, with $selector:literal assert text is $text:literal) => {
-        assert_eq!(dom!($wrapper, with $selector).text_content().unwrap(), $text);
+        assert_eq!($crate::dom!($wrapper, with $selector).text_content().unwrap(), $text);
     };
     ($wrapper:ident, with $selector:literal assert text contains $text:literal) => {
-        assert!(dom!($wrapper, with $selector).text_content().unwrap().contains($text));
+        assert!($crate::dom!($wrapper, with $selector).text_content().unwrap().contains($text));
     }
 }
 
