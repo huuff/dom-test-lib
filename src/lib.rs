@@ -1,12 +1,11 @@
-mod dom_macro;
 mod event;
 mod mount;
-mod test_wrapper;
 mod util;
+mod wrapper;
 
 use event::*;
 pub use mount::*;
-pub use test_wrapper::*;
+pub use wrapper::*;
 
 /// Awaits a small amount of time so hopefully effects will have run.
 ///

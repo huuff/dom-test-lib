@@ -2,20 +2,20 @@ use std::{borrow::Borrow, fmt::Display, ops::Deref};
 
 use wasm_bindgen::JsCast as _;
 
-struct TestWrapper<State: TestWrapperState> {
+pub struct TestWrapper<State: TestWrapperState> {
     root: web_sys::Element,
     state: State,
 }
 
-trait TestWrapperState {}
+pub trait TestWrapperState {}
 
-struct Empty;
+pub struct Empty;
 impl TestWrapperState for Empty {}
 
-struct Maybe<T>(Option<T>);
+pub struct Maybe<T>(Option<T>);
 impl<T> TestWrapperState for Maybe<T> {}
 
-struct Single<T>(T);
+pub struct Single<T>(T);
 impl<T> TestWrapperState for Single<T> {}
 
 impl TestWrapper<Empty> {
@@ -132,7 +132,6 @@ impl<T: TestWrapperState> TestWrapper<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use leptos::view;
     use wasm_bindgen_test::*;
 
@@ -142,32 +141,26 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn assert_exists() {
-        let root = mount_test(|| {
+        let wrapper = mount_test(|| {
             view! { <span id="existent">this exists</span> }
         });
 
-        let test_wrapper = TestWrapper::with_root(root);
-
-        test_wrapper.query_selector("#existent").assert_exists();
-        test_wrapper
-            .query_selector("#non-existent")
-            .assert_not_exists();
+        wrapper.query_selector("#existent").assert_exists();
+        wrapper.query_selector("#non-existent").assert_not_exists();
     }
 
     #[wasm_bindgen_test]
     fn assert_text() {
-        let root = mount_test(|| {
+        let wrapper = mount_test(|| {
             view! { <span id="existent">this exists</span> }
         });
 
-        let test_wrapper = TestWrapper::with_root(root);
-
-        test_wrapper
+        wrapper
             .query_selector("#existent")
             .assert_exists()
             .assert_text_is("this exists");
 
-        test_wrapper
+        wrapper
             .query_selector("#existent")
             .assert_exists()
             .assert_text_contains("exists");
@@ -175,7 +168,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn selects_option() {
-        let root = mount_test(|| {
+        let wrapper = mount_test(|| {
             view! {
                 <select>
                     <option value="">none</option>
@@ -186,9 +179,7 @@ mod tests {
             }
         });
 
-        let test_wrapper = TestWrapper::with_root(root);
-
-        let select = test_wrapper
+        let select = wrapper
             .query_selector_as::<web_sys::HtmlSelectElement>("select")
             .assert_exists();
 
@@ -202,7 +193,7 @@ mod tests {
     #[should_panic]
     #[wasm_bindgen_test]
     fn select_panics_on_not_found() {
-        let root = mount_test(|| {
+        let wrapper = mount_test(|| {
             view! {
                 <select>
                     <option value="">none</option>
@@ -213,9 +204,7 @@ mod tests {
             }
         });
 
-        let test_wrapper = TestWrapper::with_root(root);
-
-        test_wrapper
+        wrapper
             .query_selector_as::<web_sys::HtmlSelectElement>("select")
             .assert_exists()
             .select_opt("4");

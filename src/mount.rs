@@ -1,7 +1,7 @@
-/// Creates, mounts a view into the document for testing. Returns an element that contains the view.
-///
-/// This helps keeping the view self-contained and tries to prevent interacting with other elements.
-pub fn mount_test<F, V>(f: F) -> web_sys::Element
+use crate::wrapper::{Empty, TestWrapper};
+
+/// Mounts a view into a new element on the dom and returns a [`TestWrapper`] for working with it
+pub fn mount_test<F, V>(f: F) -> TestWrapper<Empty>
 where
     F: FnOnce() -> V + 'static,
     V: leptos::IntoView,
@@ -9,18 +9,16 @@ where
     use wasm_bindgen::JsCast as _;
 
     let document = leptos::document();
-    let test_wrapper = document.create_element("section").unwrap();
-    let _ = document.body().unwrap().append_child(&test_wrapper);
+    let test_root_node = document.create_element("section").unwrap();
+    let _ = document.body().unwrap().append_child(&test_root_node);
 
-    leptos::mount_to(test_wrapper.clone().unchecked_into(), f);
+    leptos::mount_to(test_root_node.clone().unchecked_into(), f);
 
-    test_wrapper
+    TestWrapper::with_root(test_root_node)
 }
 
 #[cfg(test)]
 mod test {
-    use crate::dom;
-
     use super::*;
     use leptos::view;
     use wasm_bindgen_test::*;
@@ -33,6 +31,6 @@ mod test {
             view! { <span id="mounted-span">hi</span> }
         });
 
-        dom!(test_wrapper, with "#mounted-span" assert exists);
+        test_wrapper.query_selector("#mounted-span").assert_exists();
     }
 }
