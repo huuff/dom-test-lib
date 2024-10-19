@@ -5,7 +5,7 @@ mod wrapper;
 
 use event::*;
 pub use mount::*;
-pub use wrapper::*;
+pub use wrapper::BaseTestWrapper;
 
 /// Awaits a small amount of time so hopefully effects will have run.
 ///

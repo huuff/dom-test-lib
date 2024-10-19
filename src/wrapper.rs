@@ -11,6 +11,7 @@ pub trait TestWrapperState {}
 
 pub struct Empty;
 impl TestWrapperState for Empty {}
+pub type BaseTestWrapper = TestWrapper<Empty>;
 
 pub struct Maybe<T>(Option<T>);
 impl<T> TestWrapperState for Maybe<T> {}
