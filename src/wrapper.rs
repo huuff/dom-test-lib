@@ -93,12 +93,12 @@ impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
 }
 
 impl TestWrapper<Single<web_sys::HtmlInputElement>> {
+    /// Sets the value of this input and dispatches `input` and `change` events
     pub fn change_value(&self, new_val: impl AsRef<str>) -> &Self {
-        self.state.0.set_value(new_val.as_ref());
-        self.state
-            .0
-            .dispatch_event(&crate::new_change_event())
-            .unwrap();
+        let target = &self.state.0;
+        target.set_value(new_val.as_ref());
+        target.dispatch_event(&crate::change_evt()).unwrap();
+        target.dispatch_event(&crate::input_evt()).unwrap();
         self
     }
 
@@ -125,7 +125,7 @@ impl TestWrapper<Single<web_sys::HtmlSelectElement>> {
         }
 
         target.set_value(val);
-        target.dispatch_event(&super::new_change_event()).unwrap();
+        target.dispatch_event(&super::change_evt()).unwrap();
     }
 }
 
@@ -253,10 +253,16 @@ mod tests {
         use std::sync::atomic::{AtomicBool, Ordering};
         // ARRANGE
         let change_called = Arc::new(AtomicBool::new(false));
+        let input_called = Arc::new(AtomicBool::new(false));
 
         let change_called_copy = change_called.clone();
         let change_fn = wasm_bindgen::closure::Closure::<dyn Fn()>::new(move || {
-            change_called_copy.store(true, Ordering::Release)
+            change_called_copy.store(true, Ordering::Release);
+        });
+
+        let input_called_copy = input_called.clone();
+        let input_fn = wasm_bindgen::closure::Closure::<dyn Fn()>::new(move || {
+            input_called_copy.store(true, Ordering::Release);
         });
 
         let wrapper = mount_test(|| {
@@ -268,6 +274,7 @@ mod tests {
             .assert_exists();
 
         input.set_onchange(Some(change_fn.as_ref().unchecked_ref()));
+        input.set_oninput(Some(input_fn.as_ref().unchecked_ref()));
 
         // ACT
         input.change_value("newvalue");
@@ -275,5 +282,6 @@ mod tests {
         // ASSERT
         input.assert_value_is("newvalue");
         assert!(change_called.load(Ordering::Acquire));
+        assert!(input_called.load(Ordering::Acquire));
     }
 }
