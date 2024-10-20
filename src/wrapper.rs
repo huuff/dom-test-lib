@@ -90,13 +90,47 @@ impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
             .unwrap()
             .contains(expected));
     }
+
+    pub fn next_elem(&self) -> TestWrapper<Maybe<web_sys::Element>> {
+        self.derive(|state| {
+            let state_elem: web_sys::Element = state.0.clone().into();
+            Maybe {
+                elem: state_elem.next_element_sibling(),
+                selector: String::from(""), // TODO: what do I put here?
+            }
+        })
+    }
+
+    pub fn prev_elem(&self) -> TestWrapper<Maybe<web_sys::Element>> {
+        self.derive(|state| {
+            let state_elem: web_sys::Element = state.0.clone().into();
+            Maybe {
+                elem: state_elem.previous_element_sibling(),
+                selector: String::from(""), // TODO: what do I put here?
+            }
+        })
+    }
+
+    pub fn assert_class_contains(&self, expected: &str) -> &Self {
+        let state_elem: web_sys::Element = self.state.0.clone().into();
+        let classes = state_elem.get_attribute("class").unwrap_or_default();
+        assert!(classes.contains(expected));
+        self
+    }
+
+    pub fn assert_class_not_contains(&self, expected: &str) -> &Self {
+        let state_elem: web_sys::Element = self.state.0.clone().into();
+        let classes = state_elem.get_attribute("class").unwrap_or_default();
+        assert!(classes.contains(expected));
+        self
+    }
 }
 
 impl TestWrapper<Single<web_sys::HtmlInputElement>> {
     /// Sets the value of this input and dispatches `input` and `change` events
-    pub fn change_value(&self, new_val: impl AsRef<str>) -> &Self {
+    pub fn change_value(&self, new_val: &str) -> &Self {
         let target = &self.state.0;
-        target.set_value(new_val.as_ref());
+        target.set_value(new_val);
         target.dispatch_event(&crate::change_evt()).unwrap();
         target.dispatch_event(&crate::input_evt()).unwrap();
         self
