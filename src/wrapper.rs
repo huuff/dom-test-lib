@@ -13,7 +13,11 @@ pub struct Empty;
 impl TestWrapperState for Empty {}
 pub type BaseTestWrapper = TestWrapper<Empty>;
 
-pub struct Maybe<T>(Option<T>);
+pub struct Maybe<T> {
+    /// the selector used for this wrapper, useful for printing error messages
+    selector: String,
+    elem: Option<T>,
+}
 impl<T> TestWrapperState for Maybe<T> {}
 
 pub struct Single<T>(T);
@@ -28,12 +32,9 @@ impl TestWrapper<Empty> {
         &self,
         selector: impl Borrow<str> + Display,
     ) -> TestWrapper<Maybe<web_sys::Element>> {
-        self.derive(|_| {
-            Maybe(
-                self.root
-                    .query_selector(selector.borrow())
-                    .unwrap_or_else(|_| panic!("no element found with selector `{selector}`")),
-            )
+        self.derive(|_| Maybe {
+            elem: self.root.query_selector(selector.borrow()).unwrap(),
+            selector: selector.to_string(),
         })
     }
 
@@ -41,25 +42,33 @@ impl TestWrapper<Empty> {
         &self,
         selector: impl Borrow<str> + Display,
     ) -> TestWrapper<Maybe<T>> {
-        self.derive(|_| {
-            Maybe(
-                self.root
-                    .query_selector(selector.borrow())
-                    .unwrap_or_else(|_| panic!("no element found with selector `{selector}`"))
-                    .map(|elem| elem.unchecked_into()),
-            )
+        self.derive(|_| Maybe {
+            elem: self
+                .root
+                .query_selector(selector.borrow())
+                .unwrap()
+                .map(|elem| elem.unchecked_into()),
+            selector: selector.to_string(),
         })
     }
 }
 
 impl<T> TestWrapper<Maybe<T>> {
     pub fn assert_exists(self) -> TestWrapper<Single<T>> {
-        assert!(self.state.0.is_some());
-        self.map(|maybe| Single(maybe.0.unwrap()))
+        assert!(
+            self.state.elem.is_some(),
+            "element with selector `{}` does not exist",
+            self.state.selector
+        );
+        self.map(|maybe| Single(maybe.elem.unwrap()))
     }
 
     pub fn assert_not_exists(self) {
-        assert!(self.state.0.is_none());
+        assert!(
+            self.state.elem.is_none(),
+            "element with selector `{}` actually exists",
+            self.state.selector
+        );
     }
 }
 
@@ -191,7 +200,7 @@ mod tests {
         assert_eq!(select.value(), "2");
     }
 
-    #[should_panic]
+    #[should_panic(expected = "option with value `4` not found")]
     #[wasm_bindgen_test]
     fn select_panics_on_not_found() {
         let wrapper = mount_test(|| {
@@ -209,5 +218,15 @@ mod tests {
             .query_selector_as::<web_sys::HtmlSelectElement>("select")
             .assert_exists()
             .select_opt("4");
+    }
+
+    #[should_panic(expected = "element with selector `#nonexistent` does not exist")]
+    #[wasm_bindgen_test]
+    fn assert_exist_panics() {
+        let wrapper = mount_test(|| {
+            view! { <span id="existent">This exists</span> }
+        });
+
+        wrapper.query_selector("#nonexistent").assert_exists();
     }
 }
