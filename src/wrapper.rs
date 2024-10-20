@@ -92,6 +92,21 @@ impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
     }
 }
 
+impl TestWrapper<Single<web_sys::HtmlInputElement>> {
+    pub fn change_value(&self, new_val: impl AsRef<str>) -> &Self {
+        self.state.0.set_value(new_val.as_ref());
+        self.state
+            .0
+            .dispatch_event(&crate::new_change_event())
+            .unwrap();
+        self
+    }
+
+    pub fn assert_value_is(&self, expected: impl AsRef<str>) {
+        assert_eq!(self.state.0.value(), expected.as_ref());
+    }
+}
+
 impl TestWrapper<Single<web_sys::HtmlSelectElement>> {
     /// Selects an option by value and ensures the change is appropriately propagated.
     ///
@@ -142,7 +157,10 @@ impl<T: TestWrapperState> TestWrapper<T> {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use leptos::view;
+    use wasm_bindgen::JsCast as _;
     use wasm_bindgen_test::*;
 
     use crate::mount_test;
@@ -228,5 +246,34 @@ mod tests {
         });
 
         wrapper.query_selector("#nonexistent").assert_exists();
+    }
+
+    #[wasm_bindgen_test]
+    fn change_value() {
+        use std::sync::atomic::{AtomicBool, Ordering};
+        // ARRANGE
+        let change_called = Arc::new(AtomicBool::new(false));
+
+        let change_called_copy = change_called.clone();
+        let change_fn = wasm_bindgen::closure::Closure::<dyn Fn()>::new(move || {
+            change_called_copy.store(true, Ordering::Release)
+        });
+
+        let wrapper = mount_test(|| {
+            view! { <input id="test" type="text" /> }
+        });
+
+        let input = wrapper
+            .query_selector_as::<web_sys::HtmlInputElement>("input")
+            .assert_exists();
+
+        input.set_onchange(Some(change_fn.as_ref().unchecked_ref()));
+
+        // ACT
+        input.change_value("newvalue");
+
+        // ASSERT
+        input.assert_value_is("newvalue");
+        assert!(change_called.load(Ordering::Acquire));
     }
 }
