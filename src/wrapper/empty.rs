@@ -1,6 +1,6 @@
 use wasm_bindgen::JsCast as _;
 
-use super::{Maybe, TestWrapper, TestWrapperState};
+use super::{single::Single, Maybe, TestWrapper, TestWrapperState};
 
 /// The initial state for a [`TestWrapper`]: no element has been selected yet
 pub struct Empty;
@@ -11,6 +11,7 @@ impl TestWrapper<Empty> {
         Self { root, state: Empty }
     }
 
+    /// Tries to find an element by the given CSS selector
     pub fn query(&self, selector: &str) -> TestWrapper<Maybe<web_sys::Element>> {
         self.derive(|_| Maybe {
             elem: self.root.query_selector(selector).unwrap(),
@@ -18,6 +19,7 @@ impl TestWrapper<Empty> {
         })
     }
 
+    /// Tries to find an element by the given CSS and tries to cast it to the expected element
     pub fn query_as<T: wasm_bindgen::JsCast>(&self, selector: &str) -> TestWrapper<Maybe<T>> {
         self.derive(|_| Maybe {
             elem: self
@@ -28,8 +30,22 @@ impl TestWrapper<Empty> {
             selector: selector.to_string(),
         })
     }
+
+    /// Tries to find an element by the given CSS selector, panics if the element does not exist
+    pub fn query_unchecked(&self, selector: &str) -> TestWrapper<Single<web_sys::Element>> {
+        self.query(selector).assert_exists()
+    }
+
+    /// Tries to find an element by the given CSS selector, panics if the element does not exist
+    pub fn query_as_unchecked<T: wasm_bindgen::JsCast>(
+        &self,
+        selector: &str,
+    ) -> TestWrapper<Single<T>> {
+        self.query_as(selector).assert_exists()
+    }
 }
 
+// MAYBE docstrings?
 macro_rules! impl_query_as {
     ($($name:ident => $ty:path),+ $(,)?) => {
         paste::paste! {
@@ -37,6 +53,10 @@ macro_rules! impl_query_as {
                 $(
                     pub fn [<query_as_ $name>](&self, selector: &str) -> TestWrapper<Maybe<$ty>> {
                         self.query_as::<$ty>(selector)
+                    }
+
+                    pub fn [<query_as_ $name _unchecked>](&self, selector: &str) -> TestWrapper<Single<$ty>> {
+                        self.query_as_unchecked::<$ty>(selector)
                     }
                 )+
             }
