@@ -29,3 +29,42 @@ impl TestWrapper<Empty> {
         })
     }
 }
+
+macro_rules! impl_query_as {
+    ($($name:ident => $ty:path),+ $(,)?) => {
+        paste::paste! {
+            impl TestWrapper<Empty> {
+                $(
+                    pub fn [<query_as_ $name>](&self, selector: &str) -> TestWrapper<Maybe<$ty>> {
+                        self.query_as::<$ty>(selector)
+                    }
+                )+
+            }
+        }
+    };
+}
+
+impl_query_as!(
+    select => web_sys::HtmlSelectElement,
+    input => web_sys::HtmlInputElement,
+    button => web_sys::HtmlButtonElement,
+    label => web_sys::HtmlLabelElement,
+);
+
+#[cfg(test)]
+mod tests {
+    use wasm_bindgen_test::*;
+
+    wasm_bindgen_test_configure!(run_in_browser);
+
+    #[wasm_bindgen_test]
+    fn query_as_input() {
+        let wrapper = crate::mount_test(|| {
+            leptos::view! { <input id="input" value="test" /> }
+        });
+
+        let input = wrapper.query_as_input("input").assert_exists();
+
+        assert_eq!(input.value(), "test");
+    }
+}
