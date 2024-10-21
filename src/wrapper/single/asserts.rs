@@ -3,14 +3,15 @@ use crate::wrapper::TestWrapper;
 use super::Single;
 
 impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
-    pub fn assert_text_is(&self, expected: &str) {
+    pub fn assert_text_is(&self, expected: &str) -> &Self {
         assert_eq!(
             self.state.0.clone().into().text_content().unwrap(),
             expected
         );
+        self
     }
 
-    pub fn assert_text_contains(&self, expected: &str) {
+    pub fn assert_text_contains(&self, expected: &str) -> &Self {
         assert!(self
             .state
             .0
@@ -19,6 +20,7 @@ impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
             .text_content()
             .unwrap()
             .contains(expected));
+        self
     }
 
     pub fn assert_class_contains(&self, expected: &str) -> &Self {
