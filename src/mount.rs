@@ -31,6 +31,6 @@ mod test {
             view! { <span id="mounted-span">hi</span> }
         });
 
-        test_wrapper.query_selector("#mounted-span").assert_exists();
+        test_wrapper.query("#mounted-span").assert_exists();
     }
 }

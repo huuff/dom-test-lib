@@ -55,12 +55,12 @@ mod tests {
         });
 
         wrapper
-            .query_selector("#existent")
+            .query("#existent")
             .assert_exists()
             .assert_text_is("this exists");
 
         wrapper
-            .query_selector("#existent")
+            .query("#existent")
             .assert_exists()
             .assert_text_contains("exists");
     }

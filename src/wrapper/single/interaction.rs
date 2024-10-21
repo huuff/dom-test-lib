@@ -65,7 +65,7 @@ mod tests {
         });
 
         let select = wrapper
-            .query_selector_as::<web_sys::HtmlSelectElement>("select")
+            .query_as::<web_sys::HtmlSelectElement>("select")
             .assert_exists();
 
         assert_eq!(select.value(), "");
@@ -90,7 +90,7 @@ mod tests {
         });
 
         wrapper
-            .query_selector_as::<web_sys::HtmlSelectElement>("select")
+            .query_as::<web_sys::HtmlSelectElement>("select")
             .assert_exists()
             .select_opt("4");
     }
@@ -117,7 +117,7 @@ mod tests {
         });
 
         let input = wrapper
-            .query_selector_as::<web_sys::HtmlInputElement>("input")
+            .query_as::<web_sys::HtmlInputElement>("input")
             .assert_exists();
 
         input.set_onchange(Some(change_fn.as_ref().unchecked_ref()));

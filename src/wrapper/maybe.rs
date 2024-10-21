@@ -46,7 +46,7 @@ mod tests {
             view! { <span id="existent">This exists</span> }
         });
 
-        wrapper.query_selector("#nonexistent").assert_exists();
+        wrapper.query("#nonexistent").assert_exists();
     }
 
     #[wasm_bindgen_test]
@@ -55,7 +55,7 @@ mod tests {
             view! { <span id="existent">this exists</span> }
         });
 
-        wrapper.query_selector("#existent").assert_exists();
-        wrapper.query_selector("#non-existent").assert_not_exists();
+        wrapper.query("#existent").assert_exists();
+        wrapper.query("#non-existent").assert_not_exists();
     }
 }

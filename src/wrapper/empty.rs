@@ -11,17 +11,14 @@ impl TestWrapper<Empty> {
         Self { root, state: Empty }
     }
 
-    pub fn query_selector(&self, selector: &str) -> TestWrapper<Maybe<web_sys::Element>> {
+    pub fn query(&self, selector: &str) -> TestWrapper<Maybe<web_sys::Element>> {
         self.derive(|_| Maybe {
             elem: self.root.query_selector(selector).unwrap(),
             selector: selector.to_string(),
         })
     }
 
-    pub fn query_selector_as<T: wasm_bindgen::JsCast>(
-        &self,
-        selector: &str,
-    ) -> TestWrapper<Maybe<T>> {
+    pub fn query_as<T: wasm_bindgen::JsCast>(&self, selector: &str) -> TestWrapper<Maybe<T>> {
         self.derive(|_| Maybe {
             elem: self
                 .root
