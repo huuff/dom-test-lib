@@ -12,6 +12,7 @@ impl TestWrapper<Single<web_sys::HtmlInputElement>> {
         self
     }
 
+    // MAYBE should be in "asserts"?
     pub fn assert_value_is(&self, expected: impl AsRef<str>) {
         assert_eq!(self.state.0.value(), expected.as_ref());
     }
