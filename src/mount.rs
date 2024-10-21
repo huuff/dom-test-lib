@@ -1,7 +1,7 @@
-use crate::wrapper::{Empty, TestWrapper};
+use super::BaseTestWrapper;
 
-/// Mounts a view into a new element on the dom and returns a [`TestWrapper`] for working with it
-pub fn mount_test<F, V>(f: F) -> TestWrapper<Empty>
+/// Mounts a view into a new element on the dom and returns a [`BaseTestWrapper`] for working with it
+pub fn mount_test<F, V>(f: F) -> BaseTestWrapper
 where
     F: FnOnce() -> V + 'static,
     V: leptos::IntoView,
@@ -14,7 +14,7 @@ where
 
     leptos::mount_to(test_root_node.clone().unchecked_into(), f);
 
-    TestWrapper::with_root(test_root_node)
+    BaseTestWrapper::with_root(test_root_node)
 }
 
 #[cfg(test)]
