@@ -48,7 +48,7 @@ mod tests {
     use wasm_bindgen::JsCast as _;
     use wasm_bindgen_test::*;
 
-    use crate::mount_test;
+    use crate::leptos::mount_test;
 
     wasm_bindgen_test_configure!(run_in_browser);
 

@@ -43,7 +43,7 @@ mod tests {
     use leptos::view;
     use wasm_bindgen_test::*;
 
-    use crate::mount_test;
+    use crate::leptos::mount_test;
 
     wasm_bindgen_test_configure!(run_in_browser);
 

@@ -4,11 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-leptos = { version = "0.6", features = ["csr"] }
-leptos_dom = { version = "0.6" }
+leptos = { version = "0.6", features = ["csr"], optional = true }
+leptos_dom = { version = "0.6", optional = true }
 wasm-bindgen = { version = "=0.2.93" }
 web-sys = { version = "0.3", features = ["EventInit"] }
 wasm-bindgen-test = { version = "0.3" }
 gloo-timers = { version = "0.3", features = ["futures"] }
 extend = { version = "1" }
 paste = { version = "1" }
+
+[features]
+leptos = ["dep:leptos", "dep:leptos_dom"]

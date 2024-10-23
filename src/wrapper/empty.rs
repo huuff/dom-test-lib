@@ -75,11 +75,13 @@ impl_query_as!(
 mod tests {
     use wasm_bindgen_test::*;
 
+    use crate::leptos::mount_test;
+
     wasm_bindgen_test_configure!(run_in_browser);
 
     #[wasm_bindgen_test]
     fn query_as_input() {
-        let wrapper = crate::mount_test(|| {
+        let wrapper = mount_test(|| {
             leptos::view! { <input id="input" value="test" /> }
         });
 

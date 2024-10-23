@@ -33,7 +33,7 @@ impl<T> TestWrapper<Maybe<T>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::mount_test;
+    use crate::leptos::mount_test;
     use leptos::view;
     use wasm_bindgen_test::*;
 
