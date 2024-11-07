@@ -1,4 +1,3 @@
-{ leptosfmt }:
 _: {
   projectRootFile = "flake.nix";
 
@@ -6,12 +5,6 @@ _: {
     nixfmt.enable = true;
     rustfmt.enable = true;
     taplo.enable = true;
-  };
-
-  settings.formatter = {
-    leptosfmt = {
-      command = "${leptosfmt}/bin/leptosfmt";
-      includes = [ "*.rs" ];
-    };
+    leptosfmt.enable = true;
   };
 }

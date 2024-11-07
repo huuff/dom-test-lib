@@ -67,7 +67,8 @@
     "gitignore": {
       "inputs": {
         "nixpkgs": [
-          "my-drvs",
+          "nix-checks",
+          "my-derivations",
           "nix-checks",
           "pre-commit",
           "nixpkgs"
@@ -90,7 +91,8 @@
     "gitignore_2": {
       "inputs": {
         "nixpkgs": [
-          "my-drvs",
+          "nix-checks",
+          "my-derivations",
           "pre-commit",
           "nixpkgs"
         ]
@@ -152,9 +154,9 @@
         "type": "github"
       }
     },
-    "my-drvs": {
+    "my-derivations": {
       "inputs": {
-        "nix-checks": "nix-checks",
+        "nix-checks": "nix-checks_2",
         "nixpkgs": "nixpkgs_3",
         "pre-commit": "pre-commit_2",
         "systems": "systems_2",
@@ -162,11 +164,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1727888347,
-        "narHash": "sha256-7mO83T4il5+3hFzyTR56fMdrriTni6OtvqK8gBv8AaM=",
+        "lastModified": 1728991964,
+        "narHash": "sha256-jvj5aHjm7OYmr4gDpBQ+sEXM9XwLktbKYXaY+UkasP4=",
         "owner": "huuff",
         "repo": "nix-derivations",
-        "rev": "c3705fab5c0fb8e661ed27a0df0ad03f65208b3e",
+        "rev": "54e71e54e58aeedb16aa205519cff71dff2ce3de",
         "type": "github"
       },
       "original": {
@@ -177,8 +179,32 @@
     },
     "nix-checks": {
       "inputs": {
+        "my-derivations": "my-derivations",
+        "nixpkgs": "nixpkgs_6",
+        "pre-commit": "pre-commit_3",
+        "systems": "systems_3",
+        "treefmt": "treefmt_3",
+        "utils": "utils_3"
+      },
+      "locked": {
+        "lastModified": 1728204415,
+        "narHash": "sha256-Bmlf60xH+ltYsI6YF4DAk9Ey0dk12S8AKlGjyajgyJo=",
+        "owner": "huuff",
+        "repo": "nix-checks",
+        "rev": "c78754e24ac6097c5fc5ac77d32c0eb66fd09483",
+        "type": "github"
+      },
+      "original": {
+        "owner": "huuff",
+        "repo": "nix-checks",
+        "type": "github"
+      }
+    },
+    "nix-checks_2": {
+      "inputs": {
         "nixpkgs": [
-          "my-drvs",
+          "nix-checks",
+          "my-derivations",
           "nixpkgs"
         ],
         "pre-commit": "pre-commit",
@@ -192,31 +218,6 @@
         "owner": "huuff",
         "repo": "nix-checks",
         "rev": "c97fc6cb665eb3e28dca34ba90dd77a0b0264b0d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "huuff",
-        "repo": "nix-checks",
-        "type": "github"
-      }
-    },
-    "nix-checks_2": {
-      "inputs": {
-        "my-derivations": [
-          "my-drvs"
-        ],
-        "nixpkgs": "nixpkgs_6",
-        "pre-commit": "pre-commit_3",
-        "systems": "systems_3",
-        "treefmt": "treefmt_3",
-        "utils": "utils_3"
-      },
-      "locked": {
-        "lastModified": 1728204415,
-        "narHash": "sha256-Bmlf60xH+ltYsI6YF4DAk9Ey0dk12S8AKlGjyajgyJo=",
-        "owner": "huuff",
-        "repo": "nix-checks",
-        "rev": "c78754e24ac6097c5fc5ac77d32c0eb66fd09483",
         "type": "github"
       },
       "original": {
@@ -291,11 +292,11 @@
     },
     "nixpkgs-stable_4": {
       "locked": {
-        "lastModified": 1720386169,
-        "narHash": "sha256-NGKVY4PjzwAa4upkGtAMz1npHGoRzWotlSnVlqI40mo=",
+        "lastModified": 1730741070,
+        "narHash": "sha256-edm8WG19kWozJ/GqyYx2VjW99EdhjKwbY3ZwdlPAAlo=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "194846768975b7ad2c4988bdb82572c00222c0d7",
+        "rev": "d063c1dd113c91ab27959ba540c0d9753409edf3",
         "type": "github"
       },
       "original": {
@@ -307,11 +308,11 @@
     },
     "nixpkgs_10": {
       "locked": {
-        "lastModified": 1718428119,
-        "narHash": "sha256-WdWDpNaq6u1IPtxtYHHWpl5BmabtpmLnMAx0RdJ/vo8=",
+        "lastModified": 1728538411,
+        "narHash": "sha256-f0SBJz1eZ2yOuKUr5CA9BHULGXVSn6miBuUWdTyhUhU=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e6cea36f83499eb4e9cd184c8a8e823296b50ad5",
+        "rev": "b69de56fac8c2b6f8fd27f2eca01dcda8e0a4221",
         "type": "github"
       },
       "original": {
@@ -435,11 +436,11 @@
     },
     "nixpkgs_9": {
       "locked": {
-        "lastModified": 1728492678,
-        "narHash": "sha256-9UTxR8eukdg+XZeHgxW5hQA9fIKHsKCdOIUycTryeVw=",
+        "lastModified": 1730785428,
+        "narHash": "sha256-Zwl8YgTVJTEum+L+0zVAWvXAGbWAuXHax3KzuejaDyo=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "5633bcff0c6162b9e4b5f1264264611e950c8ec7",
+        "rev": "4aa36568d413aca0ea84a1684d2d46f55dbabad7",
         "type": "github"
       },
       "original": {
@@ -522,11 +523,11 @@
         "nixpkgs-stable": "nixpkgs-stable_4"
       },
       "locked": {
-        "lastModified": 1728778939,
-        "narHash": "sha256-WybK5E3hpGxtCYtBwpRj1E9JoiVxe+8kX83snTNaFHE=",
+        "lastModified": 1730814269,
+        "narHash": "sha256-fWPHyhYE6xvMI1eGY3pwBTq85wcy1YXqdzTZF+06nOg=",
         "owner": "cachix",
         "repo": "git-hooks.nix",
-        "rev": "ff68f91754be6f3427e4986d7949e6273659be1d",
+        "rev": "d70155fdc00df4628446352fc58adc640cd705c2",
         "type": "github"
       },
       "original": {
@@ -537,8 +538,7 @@
     },
     "root": {
       "inputs": {
-        "my-drvs": "my-drvs",
-        "nix-checks": "nix-checks_2",
+        "nix-checks": "nix-checks",
         "nixpkgs": "nixpkgs_9",
         "pre-commit": "pre-commit_4",
         "rust-overlay": "rust-overlay",
@@ -552,11 +552,11 @@
         "nixpkgs": "nixpkgs_10"
       },
       "locked": {
-        "lastModified": 1728873041,
-        "narHash": "sha256-e4jz7yFADiZjMhv+iQwYtAN8AOUlOpbNQYnbwUFLjeM=",
+        "lastModified": 1730946479,
+        "narHash": "sha256-AxGJ3BRc44o3RBcfXxZqjVYftVtJ2sl+/WEjiLUmXRY=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "bdbe1611c2029de90bca372ce0b1e3b4fa65f55a",
+        "rev": "7fba269fe89ffad47206e0afba233d337c04cf08",
         "type": "github"
       },
       "original": {
@@ -686,11 +686,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1727984844,
-        "narHash": "sha256-xpRqITAoD8rHlXQafYZOLvUXCF6cnZkPfoq67ThN0Hc=",
+        "lastModified": 1730321837,
+        "narHash": "sha256-vK+a09qq19QNu2MlLcvN4qcRctJbqWkX7ahgPZ/+maI=",
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "rev": "4446c7a6fc0775df028c5a3f6727945ba8400e64",
+        "rev": "746901bb8dba96d154b66492a29f5db0693dbfcc",
         "type": "github"
       },
       "original": {
@@ -702,7 +702,8 @@
     "utils": {
       "inputs": {
         "systems": [
-          "my-drvs",
+          "nix-checks",
+          "my-derivations",
           "nix-checks",
           "systems"
         ]
@@ -724,7 +725,8 @@
     "utils_2": {
       "inputs": {
         "systems": [
-          "my-drvs",
+          "nix-checks",
+          "my-derivations",
           "systems"
         ]
       },

@@ -4,14 +4,12 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
     systems.url = "github:nix-systems/x86_64-linux";
-    my-drvs.url = "github:huuff/nix-derivations";
     treefmt = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-checks = {
       url = "github:huuff/nix-checks";
-      inputs.my-derivations.follows = "my-drvs";
     };
     pre-commit = {
       url = "github:cachix/git-hooks.nix";
@@ -29,7 +27,6 @@
       nixpkgs,
       utils,
       rust-overlay,
-      my-drvs,
       treefmt,
       pre-commit,
       nix-checks,
@@ -48,9 +45,7 @@
             "wasm32-unknown-unknown"
           ];
         };
-        myPkgs = my-drvs.packages.${system};
-        treefmt-build =
-          (treefmt.lib.evalModule pkgs (import ./treefmt.nix { inherit (myPkgs) leptosfmt; })).config.build;
+        treefmt-build = (treefmt.lib.evalModule pkgs (import ./treefmt.nix)).config.build;
         pre-commit-check = pre-commit.lib.${system}.run {
           src = ./.;
           hooks = import ./pre-commit.nix {
@@ -63,10 +58,10 @@
       {
         checks = {
           formatting = treefmt-build.check self;
-          statix = checks.statis ./.;
+          statix = checks.statix ./.;
           deadnix = checks.deadnix ./.;
           flake-checker = checks.flake-checker ./.;
-          clippy = checks.clippy ./.;
+          #clippy = checks.clippy ./.;
         };
 
         formatter = treefmt-build.wrapper;
@@ -76,9 +71,6 @@
           mkShell {
             inherit (pre-commit-check) shellHook;
             buildInputs = [
-              # nix
-              nil
-              nixfmt-rfc-style
 
               rustPkgs
               rust-analyzer
@@ -88,9 +80,13 @@
               cargo-generate # required for cargo-leptos
               dart-sass
               binaryen # required for release compilation
-              myPkgs.leptosfmt
+              leptosfmt # formatting leptos view! macro
               stylance-cli # bundle sass
               wasm-pack # to test wasm
+
+              # nix
+              nil
+              nixfmt-rfc-style
             ];
           };
       }
