@@ -46,6 +46,7 @@ impl TestWrapper<Empty> {
         self.query_as(selector).assert_exists()
     }
 
+    // MAYBE should also be in some other sorts of wrappers, not just empty
     /// Tries to find an element that contains exactly the given test
     ///
     /// This function is recursive! Hopefully your DOM isn't infinitely deep :^)
@@ -58,17 +59,33 @@ impl TestWrapper<Empty> {
             selector: format!("<text={text}>"),
         })
     }
+
+    pub fn find_by_text_exact_as<Target: wasm_bindgen::JsCast>(
+        &self,
+        text: &str,
+    ) -> TestWrapper<Maybe<Target>> {
+        self.derive(|_| Maybe {
+            elem: recursive_find_by_text_exact::<Target>(
+                self.root.clone().dyn_into::<web_sys::Node>().unwrap(),
+                text,
+            ),
+            selector: format!("<text={text}>"),
+        })
+    }
 }
 
-fn recursive_find_by_text_exact(root: web_sys::Node, needle: &str) -> Option<web_sys::Element> {
+fn recursive_find_by_text_exact<Target: wasm_bindgen::JsCast>(
+    root: web_sys::Node,
+    needle: &str,
+) -> Option<Target> {
     let children = root.child_nodes();
 
-    if let Ok(root) = root.dyn_into::<web_sys::Element>() {
+    if let Ok(root_as) = root.clone().dyn_into::<Target>() {
         if children.length() == 1
             && children.get(0).unwrap().has_type::<web_sys::Text>()
             && root.text_content().is_some_and(|text| text == needle)
         {
-            return Some(root);
+            return Some(root_as);
         }
     }
 
