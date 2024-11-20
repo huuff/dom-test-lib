@@ -1,5 +1,7 @@
 use wasm_bindgen::JsCast as _;
 
+use crate::util::NodeListExt;
+
 use super::{single::Single, Maybe, TestWrapper, TestWrapperState};
 
 /// The initial state for a [`TestWrapper`]: no element has been selected yet
@@ -43,6 +45,40 @@ impl TestWrapper<Empty> {
     ) -> TestWrapper<Single<T>> {
         self.query_as(selector).assert_exists()
     }
+
+    /// Tries to find an element that contains exactly the given test
+    ///
+    /// This function is recursive! Hopefully your DOM isn't infinitely deep :^)
+    pub fn find_by_text_exact(&self, text: &str) -> TestWrapper<Maybe<web_sys::Element>> {
+        self.derive(|_| Maybe {
+            elem: recursive_find_by_text_exact(
+                self.root.clone().dyn_into::<web_sys::Node>().unwrap(),
+                text,
+            ),
+            selector: format!("<text={text}>"),
+        })
+    }
+}
+
+fn recursive_find_by_text_exact(root: web_sys::Node, needle: &str) -> Option<web_sys::Element> {
+    let children = root.child_nodes();
+
+    if let Ok(root) = root.dyn_into::<web_sys::Element>() {
+        if children.length() == 1
+            && children.get(0).unwrap().has_type::<web_sys::Text>()
+            && root.text_content().is_some_and(|text| text == needle)
+        {
+            return Some(root);
+        }
+    }
+
+    for child in children.into_iterator() {
+        if let Some(matching_el) = recursive_find_by_text_exact(child, needle) {
+            return Some(matching_el);
+        }
+    }
+
+    None
 }
 
 // MAYBE docstrings?
@@ -88,5 +124,26 @@ mod tests {
         let input = wrapper.query_as_input("input").assert_exists();
 
         assert_eq!(input.value(), "test");
+    }
+
+    #[wasm_bindgen_test]
+    fn find_by_text_exact() {
+        let wrapper = mount_test(|| {
+            leptos::view! {
+                <main>
+                    <p id="nontarget1">Not the target</p>
+                    <div id="targetcontainer">
+                        <span id="found" class="found">
+                            Target 123
+                        </span>
+                    </div>
+                    <p id="nontarget2">Not the target</p>
+                </main>
+            }
+        });
+
+        let target = wrapper.find_by_text_exact("Target 123").assert_exists();
+
+        assert_eq!(target.id(), "found");
     }
 }
