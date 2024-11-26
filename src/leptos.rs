@@ -22,7 +22,16 @@ where
 #[expect(clippy::crate_in_macro_def)]
 #[macro_export]
 macro_rules! mount_i18n_test {
-    ($view:expr) => {
+    (|| { $view:expr }) => {
+        $crate::leptos::mount_test(|| {
+            leptos::view! {
+                <crate::i18n::I18nContextProvider>
+                    {$view}
+                </crate::i18n::I18nContextProvider>
+            }
+        })
+    };
+    (move || { $view:expr }) => {
         $crate::leptos::mount_test(move || {
             leptos::view! {
                 <crate::i18n::I18nContextProvider>
@@ -55,7 +64,7 @@ mod test {
 
     // #[wasm_bindgen_test]
     // fn mount_i18_doesnt_break_spectacularly() {
-    //     let test_wrapper = mount_i18n_test!(|| {
+    //     let test_wrapper = mount_i18n_test!(move || {
     //         view! { <span id="mounted-span">hi</span> }
     //     });
 
