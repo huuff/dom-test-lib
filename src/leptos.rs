@@ -22,7 +22,7 @@ where
 #[expect(clippy::crate_in_macro_def)]
 #[macro_export]
 macro_rules! mount_i18n_test {
-    (|| { $view:expr }) => {
+    (|| $view:expr ) => {
         $crate::leptos::mount_test(|| {
             leptos::view! {
                 <crate::i18n::I18nContextProvider>
@@ -31,7 +31,7 @@ macro_rules! mount_i18n_test {
             }
         })
     };
-    (move || { $view:expr }) => {
+    (move || $view:expr ) => {
         $crate::leptos::mount_test(move || {
             leptos::view! {
                 <crate::i18n::I18nContextProvider>
