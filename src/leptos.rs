@@ -23,8 +23,8 @@ where
 #[macro_export]
 macro_rules! mount_i18n_test {
     ($view:expr) => {
-        mount_test(|| {
-            view! {
+        $crate::leptos::mount_test(|| {
+            leptos::view! {
                 <crate::i18n::I18nContextProvider>
                     {$view}
                 </crate::i18n::I18nContextProvider>
