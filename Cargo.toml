@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 leptos = { version = "0.6", features = ["csr"], optional = true }
 leptos_dom = { version = "0.6", optional = true }
-wasm-bindgen = { version = "=0.2.93" }
+wasm-bindgen = { version = "0.2.95" }
 web-sys = { version = "0.3", features = ["EventInit"] }
 wasm-bindgen-test = { version = "0.3" }
 gloo-timers = { version = "0.3", features = ["futures"] }
