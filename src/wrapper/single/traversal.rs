@@ -1,11 +1,14 @@
-use crate::wrapper::{maybe::Maybe, TestWrapper};
+use crate::{
+    framework::Framework,
+    wrapper::{maybe::Maybe, TestWrapper},
+};
 
 use super::Single;
 
 // TODO test
-impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
+impl<E: Into<web_sys::Element> + Clone, Fw: Framework> TestWrapper<Single<E>, Fw> {
     // TODO can I DRY these three?
-    pub fn next_elem(&self) -> TestWrapper<Maybe<web_sys::Element>> {
+    pub fn next_elem(&self) -> TestWrapper<Maybe<web_sys::Element>, Fw> {
         self.derive(|state| {
             let state_elem: web_sys::Element = state.0.clone().into();
             Maybe {
@@ -15,7 +18,7 @@ impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
         })
     }
 
-    pub fn prev_elem(&self) -> TestWrapper<Maybe<web_sys::Element>> {
+    pub fn prev_elem(&self) -> TestWrapper<Maybe<web_sys::Element>, Fw> {
         self.derive(|state| {
             let state_elem: web_sys::Element = state.0.clone().into();
             Maybe {
@@ -26,7 +29,7 @@ impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
     }
 
     // TODO: shouldn't this be `parent_elem`?
-    pub fn parent(&self) -> TestWrapper<Maybe<web_sys::Element>> {
+    pub fn parent(&self) -> TestWrapper<Maybe<web_sys::Element>, Fw> {
         self.derive(|state| {
             let state_elem: web_sys::Element = state.0.clone().into();
             Maybe {

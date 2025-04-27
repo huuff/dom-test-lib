@@ -1,3 +1,3 @@
 test:
-  cargo test --all-features --all-targets && \
+  cargo test --all-features && \
   wasm-pack test --firefox --headless --all-features

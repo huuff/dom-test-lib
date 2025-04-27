@@ -1,8 +1,8 @@
-use crate::{change_evt, wrapper::TestWrapper};
+use crate::{change_evt, framework::Framework, wrapper::TestWrapper};
 
 use super::Single;
 
-impl TestWrapper<Single<web_sys::HtmlInputElement>> {
+impl<Fw: Framework> TestWrapper<Single<web_sys::HtmlInputElement>, Fw> {
     /// Sets the value of this input and dispatches `input` and `change` events
     pub fn change_value(&self, new_val: &str) -> &Self {
         let target = &self.state.0;
@@ -18,7 +18,7 @@ impl TestWrapper<Single<web_sys::HtmlInputElement>> {
     }
 }
 
-impl TestWrapper<Single<web_sys::HtmlSelectElement>> {
+impl<Fw: Framework> TestWrapper<Single<web_sys::HtmlSelectElement>, Fw> {
     /// Selects an option by value and ensures the change is appropriately propagated.
     ///
     /// panics if the option doesn't exist
@@ -40,15 +40,14 @@ impl TestWrapper<Single<web_sys::HtmlSelectElement>> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_family = "wasm"))]
 mod tests {
     use std::sync::Arc;
 
-    use leptos::view;
+    use crate::framework::leptos::mount_test;
+    use leptos::prelude::*;
     use wasm_bindgen::JsCast as _;
     use wasm_bindgen_test::*;
-
-    use crate::leptos::mount_test;
 
     wasm_bindgen_test_configure!(run_in_browser);
 

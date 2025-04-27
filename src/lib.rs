@@ -1,9 +1,12 @@
 mod event;
-#[cfg(feature = "leptos")]
-pub mod leptos;
+pub mod framework;
 pub mod util;
 mod wrapper;
 
+// TODO: remove dis?
 use event::*;
 
 pub use wrapper::BaseTestWrapper;
+
+#[cfg(feature = "leptos")]
+pub use framework::leptos::*;
