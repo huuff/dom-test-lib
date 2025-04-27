@@ -12,6 +12,7 @@ wasm-bindgen-test = { version = "0.3" }
 gloo-timers = { version = "0.3", features = ["futures"] }
 extend = { version = "1" }
 paste = { version = "1" }
+cfg-if = { version = "1" }
 
 [features]
 leptos = ["dep:leptos", "dep:leptos_dom"]
