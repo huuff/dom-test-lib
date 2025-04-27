@@ -9,4 +9,4 @@ use event::*;
 pub use wrapper::BaseTestWrapper;
 
 #[cfg(feature = "leptos")]
-pub use framework::leptos::*;
+pub use framework::leptos;
