@@ -1,3 +1,5 @@
+use crate::framework::Framework;
+
 use super::{single::Single, TestWrapper, TestWrapperState};
 
 /// A wrapper in an indeterminate state: it may hold an element or it may not,
@@ -9,10 +11,10 @@ pub struct Maybe<T> {
 }
 impl<T> TestWrapperState for Maybe<T> {}
 
-impl<T> TestWrapper<Maybe<T>> {
+impl<T, Fw: Framework> TestWrapper<Maybe<T>, Fw> {
     /// Run an assertion that this element exists, and also promote this to
     /// a [`TestWrapper`] that ensures it's element exists
-    pub fn assert_exists(self) -> TestWrapper<Single<T>> {
+    pub fn assert_exists(self) -> TestWrapper<Single<T>, Fw> {
         assert!(
             self.state.elem.is_some(),
             "element with selector `{}` does not exist",
@@ -31,10 +33,10 @@ impl<T> TestWrapper<Maybe<T>> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_family = "wasm"))]
 mod tests {
-    use crate::leptos::mount_test;
-    use leptos::view;
+    use crate::framework::leptos::mount_test;
+    use leptos::prelude::*;
     use wasm_bindgen_test::*;
 
     wasm_bindgen_test_configure!(run_in_browser);

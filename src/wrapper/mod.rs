@@ -1,32 +1,38 @@
+mod constructor;
 mod empty;
 mod maybe;
 mod single;
 
+pub use constructor::BaseTestWrapper;
+
 use maybe::Maybe;
 
-pub type BaseTestWrapper = TestWrapper<empty::Empty>;
+use crate::framework::Framework;
 
-pub struct TestWrapper<State: TestWrapperState> {
+pub struct TestWrapper<State: TestWrapperState, Fw: Framework> {
     root: web_sys::Element,
     state: State,
+    _framework_ctx: Fw::Context,
 }
 
 pub trait TestWrapperState {}
 
-impl<T: TestWrapperState> TestWrapper<T> {
+impl<T: TestWrapperState, Fw: Framework> TestWrapper<T, Fw> {
     /// Creates a new [`TestWrapper`] from this one while keeping the same root node
-    fn derive<S: TestWrapperState>(&self, state_fn: impl Fn(&T) -> S) -> TestWrapper<S> {
+    fn derive<S: TestWrapperState>(&self, state_fn: impl Fn(&T) -> S) -> TestWrapper<S, Fw> {
         TestWrapper {
             root: self.root.clone(),
             state: state_fn(&self.state),
+            _framework_ctx: self._framework_ctx.clone(),
         }
     }
 
     /// Converts this [`TestWrapper`] into a new one while keeping the root node
-    fn map<S: TestWrapperState>(self, state_fn: impl FnOnce(T) -> S) -> TestWrapper<S> {
+    fn map<S: TestWrapperState>(self, state_fn: impl FnOnce(T) -> S) -> TestWrapper<S, Fw> {
         TestWrapper {
             root: self.root,
             state: state_fn(self.state),
+            _framework_ctx: self._framework_ctx,
         }
     }
 }

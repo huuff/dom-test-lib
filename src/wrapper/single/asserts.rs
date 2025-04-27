@@ -1,8 +1,8 @@
-use crate::wrapper::TestWrapper;
+use crate::{framework::Framework, wrapper::TestWrapper};
 
 use super::Single;
 
-impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
+impl<E: Into<web_sys::Element> + Clone, Fw: Framework> TestWrapper<Single<E>, Fw> {
     pub fn assert_text_is(&self, expected: &str) -> &Self {
         assert_eq!(
             self.state.0.clone().into().text_content().unwrap(),
@@ -38,12 +38,12 @@ impl<E: Into<web_sys::Element> + Clone> TestWrapper<Single<E>> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_family = "wasm"))]
 mod tests {
-    use leptos::view;
+    use leptos::prelude::*;
     use wasm_bindgen_test::*;
 
-    use crate::leptos::mount_test;
+    use crate::framework::leptos::mount_test;
 
     wasm_bindgen_test_configure!(run_in_browser);
 

@@ -1,6 +1,6 @@
 use wasm_bindgen::JsCast as _;
 
-use crate::util::NodeListExt;
+use crate::{framework::Framework, util::NodeListExt};
 
 use super::{single::Single, Maybe, TestWrapper, TestWrapperState};
 
@@ -8,13 +8,9 @@ use super::{single::Single, Maybe, TestWrapper, TestWrapperState};
 pub struct Empty;
 impl TestWrapperState for Empty {}
 
-impl TestWrapper<Empty> {
-    pub fn with_root(root: web_sys::Element) -> Self {
-        Self { root, state: Empty }
-    }
-
+impl<Fw: Framework> TestWrapper<Empty, Fw> {
     /// Tries to find an element by the given CSS selector
-    pub fn query(&self, selector: &str) -> TestWrapper<Maybe<web_sys::Element>> {
+    pub fn query(&self, selector: &str) -> TestWrapper<Maybe<web_sys::Element>, Fw> {
         self.derive(|_| Maybe {
             elem: self.root.query_selector(selector).unwrap(),
             selector: selector.to_string(),
@@ -22,7 +18,7 @@ impl TestWrapper<Empty> {
     }
 
     /// Tries to find an element by the given CSS and tries to cast it to the expected element
-    pub fn query_as<T: wasm_bindgen::JsCast>(&self, selector: &str) -> TestWrapper<Maybe<T>> {
+    pub fn query_as<T: wasm_bindgen::JsCast>(&self, selector: &str) -> TestWrapper<Maybe<T>, Fw> {
         self.derive(|_| Maybe {
             elem: self
                 .root
@@ -34,7 +30,7 @@ impl TestWrapper<Empty> {
     }
 
     /// Tries to find an element by the given CSS selector, panics if the element does not exist
-    pub fn query_unchecked(&self, selector: &str) -> TestWrapper<Single<web_sys::Element>> {
+    pub fn query_unchecked(&self, selector: &str) -> TestWrapper<Single<web_sys::Element>, Fw> {
         self.query(selector).assert_exists()
     }
 
@@ -42,7 +38,7 @@ impl TestWrapper<Empty> {
     pub fn query_as_unchecked<T: wasm_bindgen::JsCast>(
         &self,
         selector: &str,
-    ) -> TestWrapper<Single<T>> {
+    ) -> TestWrapper<Single<T>, Fw> {
         self.query_as(selector).assert_exists()
     }
 
@@ -50,7 +46,7 @@ impl TestWrapper<Empty> {
     /// Tries to find an element that contains exactly the given test
     ///
     /// This function is recursive! Hopefully your DOM isn't infinitely deep :^)
-    pub fn find_by_text_exact(&self, text: &str) -> TestWrapper<Maybe<web_sys::Element>> {
+    pub fn find_by_text_exact(&self, text: &str) -> TestWrapper<Maybe<web_sys::Element>, Fw> {
         self.derive(|_| Maybe {
             elem: recursive_find_by_text_exact(
                 self.root.clone().dyn_into::<web_sys::Node>().unwrap(),
@@ -63,7 +59,7 @@ impl TestWrapper<Empty> {
     pub fn find_by_text_exact_as<Target: wasm_bindgen::JsCast>(
         &self,
         text: &str,
-    ) -> TestWrapper<Maybe<Target>> {
+    ) -> TestWrapper<Maybe<Target>, Fw> {
         self.derive(|_| Maybe {
             elem: recursive_find_by_text_exact::<Target>(
                 self.root.clone().dyn_into::<web_sys::Node>().unwrap(),
@@ -102,13 +98,13 @@ fn recursive_find_by_text_exact<Target: wasm_bindgen::JsCast>(
 macro_rules! impl_query_as {
     ($($name:ident => $ty:path),+ $(,)?) => {
         paste::paste! {
-            impl TestWrapper<Empty> {
+            impl<Fw: Framework> TestWrapper<Empty, Fw> {
                 $(
-                    pub fn [<query_as_ $name>](&self, selector: &str) -> TestWrapper<Maybe<$ty>> {
+                    pub fn [<query_as_ $name>](&self, selector: &str) -> TestWrapper<Maybe<$ty>, Fw> {
                         self.query_as::<$ty>(selector)
                     }
 
-                    pub fn [<query_as_ $name _unchecked>](&self, selector: &str) -> TestWrapper<Single<$ty>> {
+                    pub fn [<query_as_ $name _unchecked>](&self, selector: &str) -> TestWrapper<Single<$ty>, Fw> {
                         self.query_as_unchecked::<$ty>(selector)
                     }
                 )+
@@ -124,18 +120,19 @@ impl_query_as!(
     label => web_sys::HtmlLabelElement,
 );
 
-#[cfg(test)]
+#[cfg(all(test, target_family = "wasm"))]
 mod tests {
+    use leptos::prelude::*;
     use wasm_bindgen_test::*;
 
-    use crate::leptos::mount_test;
+    use crate::framework::leptos::mount_test;
 
     wasm_bindgen_test_configure!(run_in_browser);
 
     #[wasm_bindgen_test]
     fn query_as_input() {
         let wrapper = mount_test(|| {
-            leptos::view! { <input id="input" value="test" /> }
+            view! { <input id="input" value="test" /> }
         });
 
         let input = wrapper.query_as_input("input").assert_exists();
@@ -146,7 +143,7 @@ mod tests {
     #[wasm_bindgen_test]
     fn find_by_text_exact() {
         let wrapper = mount_test(|| {
-            leptos::view! {
+            view! {
                 <main>
                     <p id="nontarget1">Not the target</p>
                     <div id="targetcontainer">

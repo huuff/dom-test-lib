@@ -1,22 +1,32 @@
-use super::BaseTestWrapper;
+use std::sync::Arc;
+
+use super::implementation::Leptos;
+use crate::{framework::leptos::implementation::ErasedDestructor, wrapper::BaseTestWrapper};
+use leptos::prelude::*;
 
 /// Mounts a view into a new element on the dom and returns a [`BaseTestWrapper`] for working with it
-pub fn mount_test<F, V>(f: F) -> BaseTestWrapper
+pub fn mount_test<F, V>(f: F) -> BaseTestWrapper<Leptos>
 where
     F: FnOnce() -> V + 'static,
-    V: leptos::IntoView,
+    V: IntoView,
+    <V as Render>::State: 'static,
 {
     use wasm_bindgen::JsCast as _;
 
-    let document = leptos::document();
+    let document = document();
     let test_root_node = document.create_element("section").unwrap();
     let _ = document.body().unwrap().append_child(&test_root_node);
 
-    leptos::mount_to(test_root_node.clone().unchecked_into(), f);
+    let handle = mount_to(test_root_node.clone().unchecked_into(), f);
 
-    BaseTestWrapper::with_root(test_root_node)
+    BaseTestWrapper::with_root(
+        test_root_node,
+        Arc::new(handle) as Arc<dyn ErasedDestructor>,
+    )
 }
 
+// TODO I don't particularly like this... note that there's a way to do it without the wrapper by doing
+// `provide_context(leptos_i18n::context::init_i18n_context::<crate::i18n::Locale>())`
 /// Really the same as mount_test, but also adds an `I18nContextProvider` from the
 /// caller crate.
 #[expect(clippy::crate_in_macro_def)]
@@ -42,7 +52,7 @@ macro_rules! mount_i18n_test {
     };
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_family = "wasm"))]
 mod test {
     use super::*;
     use leptos::view;
