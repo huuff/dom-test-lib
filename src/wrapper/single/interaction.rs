@@ -1,14 +1,20 @@
+use web_sys::HtmlElement;
+
 use crate::{change_evt, framework::Framework, wrapper::TestWrapper};
 
 use super::Single;
 
 impl<Fw: Framework> TestWrapper<Single<web_sys::HtmlInputElement>, Fw> {
     /// Sets the value of this input and dispatches `input` and `change` events
-    pub fn change_value(&self, new_val: &str) -> &Self {
+    pub async fn change_value(&self, new_val: &str) -> &Self {
         let target = &self.state.0;
         target.set_value(new_val);
         target.dispatch_event(&crate::change_evt()).unwrap();
         target.dispatch_event(&crate::input_evt()).unwrap();
+
+        #[cfg(feature = "leptos")]
+        leptos::task::tick().await;
+
         self
     }
 
@@ -22,7 +28,7 @@ impl<Fw: Framework> TestWrapper<Single<web_sys::HtmlSelectElement>, Fw> {
     /// Selects an option by value and ensures the change is appropriately propagated.
     ///
     /// panics if the option doesn't exist
-    pub fn select_opt(&self, val: &str) {
+    pub async fn select_opt(&self, val: &str) -> &Self {
         use crate::util::NodeListExt as _;
 
         let target = &self.state.0;
@@ -37,22 +43,39 @@ impl<Fw: Framework> TestWrapper<Single<web_sys::HtmlSelectElement>, Fw> {
 
         target.set_value(val);
         target.dispatch_event(&change_evt()).unwrap();
+
+        #[cfg(feature = "leptos")]
+        leptos::task::tick().await;
+
+        self
+    }
+}
+
+impl<Fw: Framework, Elem: AsRef<HtmlElement>> TestWrapper<Single<Elem>, Fw> {
+    pub async fn click(&self) -> &Self {
+        let target: &HtmlElement = self.state.0.as_ref();
+
+        target.click();
+
+        #[cfg(feature = "leptos")]
+        leptos::task::tick().await;
+
+        self
     }
 }
 
 #[cfg(all(test, target_family = "wasm"))]
 mod tests {
-    use std::sync::Arc;
+    use std::sync::{Arc, Mutex};
 
     use crate::framework::leptos::mount_test;
     use leptos::prelude::*;
-    use wasm_bindgen::JsCast as _;
     use wasm_bindgen_test::*;
 
     wasm_bindgen_test_configure!(run_in_browser);
 
     #[wasm_bindgen_test]
-    fn selects_option() {
+    async fn selects_option() {
         let wrapper = mount_test(|| {
             view! {
                 <select>
@@ -70,14 +93,14 @@ mod tests {
 
         assert_eq!(select.value(), "");
 
-        select.select_opt("2");
+        select.select_opt("2").await;
 
         assert_eq!(select.value(), "2");
     }
 
     #[should_panic(expected = "option with value `4` not found")]
     #[wasm_bindgen_test]
-    fn select_panics_on_not_found() {
+    async fn select_panics_on_not_found() {
         let wrapper = mount_test(|| {
             view! {
                 <select>
@@ -92,43 +115,80 @@ mod tests {
         wrapper
             .query_as::<web_sys::HtmlSelectElement>("select")
             .assert_exists()
-            .select_opt("4");
+            .select_opt("4")
+            .await;
     }
 
     #[wasm_bindgen_test]
-    fn change_value() {
-        use std::sync::atomic::{AtomicBool, Ordering};
+    async fn change_value() {
         // ARRANGE
-        let change_called = Arc::new(AtomicBool::new(false));
-        let input_called = Arc::new(AtomicBool::new(false));
+        let change_called = Arc::new(Mutex::new(String::default()));
+        let input_called = Arc::new(Mutex::new(String::default()));
 
         let change_called_copy = change_called.clone();
-        let change_fn = wasm_bindgen::closure::Closure::<dyn Fn()>::new(move || {
-            change_called_copy.store(true, Ordering::Release);
-        });
-
         let input_called_copy = input_called.clone();
-        let input_fn = wasm_bindgen::closure::Closure::<dyn Fn()>::new(move || {
-            input_called_copy.store(true, Ordering::Release);
-        });
-
         let wrapper = mount_test(|| {
-            view! { <input id="test" type="text" /> }
+            view! {
+                <input
+                    id="test"
+                    type="text"
+                    on:input=move |evt| {
+                        let mut input_called = input_called_copy.lock().unwrap();
+                        *input_called = event_target_value(&evt);
+                    }
+                    on:change=move |evt| {
+                        let mut change_called = change_called_copy.lock().unwrap();
+                        *change_called = event_target_value(&evt);
+                    }
+                />
+            }
         });
 
         let input = wrapper
             .query_as::<web_sys::HtmlInputElement>("input")
             .assert_exists();
 
-        input.set_onchange(Some(change_fn.as_ref().unchecked_ref()));
-        input.set_oninput(Some(input_fn.as_ref().unchecked_ref()));
-
         // ACT
-        input.change_value("newvalue");
+        input.change_value("newvalue").await;
 
         // ASSERT
         input.assert_value_is("newvalue");
-        assert!(change_called.load(Ordering::Acquire));
-        assert!(input_called.load(Ordering::Acquire));
+        assert_eq!(*input_called.lock().unwrap(), "newvalue");
+        assert_eq!(*change_called.lock().unwrap(), "newvalue");
+    }
+
+    #[wasm_bindgen_test]
+    async fn click_clicks() {
+        use std::sync::atomic::{AtomicBool, Ordering};
+
+        // ARRANGE
+        let clicked = Arc::new(AtomicBool::new(false));
+
+        let clicked_clone = Arc::clone(&clicked);
+        let wrapper = mount_test(|| {
+            view! {
+                <button
+                    type="button"
+                    on:click=move |_| clicked_clone.store(true, Ordering::Release)
+                >
+                    click me
+                </button>
+            }
+        });
+
+        assert!(
+            !clicked.load(Ordering::Acquire),
+            "sanity check failed: state is clicked before click event"
+        );
+
+        // ACT
+        wrapper
+            .query_as::<web_sys::HtmlButtonElement>("button")
+            .assert_exists()
+            .click()
+            .await;
+
+        // ASSERT
+        assert!(clicked.load(Ordering::Acquire));
     }
 }
