@@ -2,12 +2,14 @@ use wasm_bindgen::JsCast as _;
 
 use crate::{framework::Framework, util::NodeListExt};
 
-use super::{single::Single, Maybe, TestWrapper, TestWrapperState};
+use super::{many::Many, single::Single, Maybe, TestWrapper, TestWrapperState};
 
 /// The initial state for a [`TestWrapper`]: no element has been selected yet
 pub struct Empty;
 impl TestWrapperState for Empty {}
 
+// MAYBE I should remove the `query_*_unchecked` methods because "unchecked" usually means it's not safe, which is not the case since they just do an assertion. The names are confusing, and letting the user make the assertion themselves is no big hassle anyway
+// MAYBE querying should also be in some other sorts of wrappers, not just empty
 impl<Fw: Framework> TestWrapper<Empty, Fw> {
     /// Tries to find an element by the given CSS selector
     pub fn query(&self, selector: &str) -> TestWrapper<Maybe<web_sys::Element>, Fw> {
@@ -42,7 +44,32 @@ impl<Fw: Framework> TestWrapper<Empty, Fw> {
         self.query_as(selector).assert_exists()
     }
 
-    // MAYBE should also be in some other sorts of wrappers, not just empty
+    /// Finds all elements that match the given CSS selector.
+    pub fn query_all(&self, selector: &str) -> TestWrapper<Many<web_sys::Element>, Fw> {
+        self.derive(|_| Many {
+            elems: self
+                .root
+                .query_selector_all(selector)
+                .expect("couldn't select nodes")
+                .to_elem_vec(),
+        })
+    }
+
+    /// Finds al elements that match the given CSS selector and tries to cast them into the expected element type
+    pub fn query_all_as<T: wasm_bindgen::JsCast>(
+        &self,
+        selector: &str,
+    ) -> TestWrapper<Many<T>, Fw> {
+        self.derive(|_| Many {
+            elems: self
+                .root
+                .query_selector_all(selector)
+                .expect("couldn't select nodes")
+                .to_elem_vec(),
+        })
+    }
+
+    // MAYBE find by text should be somewhere else
     /// Tries to find an element that contains exactly the given test
     ///
     /// This function is recursive! Hopefully your DOM isn't infinitely deep :^)
@@ -159,5 +186,23 @@ mod tests {
         let target = wrapper.find_by_text_exact("Target 123").assert_exists();
 
         assert_eq!(target.id(), "found");
+    }
+
+    #[wasm_bindgen_test]
+    fn query_all_spans() {
+        let wrapper = mount_test(|| {
+            view! {
+                <div>
+                    <span>Span 1</span>
+                    <button>A button</button>
+                    <span>Span 2</span>
+                    <span>Span 3</span>
+                </div>
+            }
+        });
+
+        let result = wrapper.query_all_as::<web_sys::HtmlSpanElement>("span");
+
+        assert_eq!(result.len(), 3);
     }
 }
