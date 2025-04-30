@@ -1,3 +1,4 @@
+// TODO: A specific module for this
 #[extend::ext(name = NodeListExt)]
 pub impl web_sys::NodeList {
     fn to_elem_vec<Elem: wasm_bindgen::JsCast>(&self) -> Vec<Elem> {
