@@ -38,7 +38,7 @@ impl<E: Into<web_sys::Element> + Clone, Fw: Framework> TestWrapper<Single<E>, Fw
     }
 }
 
-#[cfg(all(test, target_family = "wasm"))]
+#[cfg(test)]
 mod tests {
     use leptos::prelude::*;
     use wasm_bindgen_test::*;
@@ -48,7 +48,8 @@ mod tests {
     wasm_bindgen_test_configure!(run_in_browser);
 
     // TODO test class asserts
-    #[wasm_bindgen_test]
+    #[wasm_bindgen_test(unsupported = test)]
+    #[cfg_attr(not(target_family = "wasm"), ignore)]
     fn assert_text() {
         let wrapper = mount_test(|| {
             view! { <span id="existent">this exists</span> }

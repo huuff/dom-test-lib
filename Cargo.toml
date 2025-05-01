@@ -17,5 +17,10 @@ extend = { version = "1" }
 paste = { version = "1" }
 cfg-if = { version = "1" }
 
+[dev-dependencies]
+# XXX: actually I don't think I use it at all, just for marking some tests for a hacky workaround for
+# wasm-bindgen-test
+tokio = { version = "1", features = ["full"] }
+
 [features]
 leptos = ["dep:leptos", "dep:leptos_dom"]

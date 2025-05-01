@@ -33,7 +33,7 @@ impl<T, Fw: Framework> TestWrapper<Maybe<T>, Fw> {
     }
 }
 
-#[cfg(all(test, target_family = "wasm"))]
+#[cfg(test)]
 mod tests {
     use crate::framework::leptos::mount_test;
     use leptos::prelude::*;
@@ -42,7 +42,8 @@ mod tests {
     wasm_bindgen_test_configure!(run_in_browser);
 
     #[should_panic(expected = "element with selector `#nonexistent` does not exist")]
-    #[wasm_bindgen_test]
+    #[wasm_bindgen_test(unsupported = test)]
+    #[cfg_attr(not(target_family = "wasm"), ignore)]
     fn assert_exist_panics() {
         let wrapper = mount_test(|| {
             view! { <span id="existent">This exists</span> }
@@ -51,7 +52,8 @@ mod tests {
         wrapper.query("#nonexistent").assert_exists();
     }
 
-    #[wasm_bindgen_test]
+    #[wasm_bindgen_test(unsupported = test)]
+    #[cfg_attr(not(target_family = "wasm"), ignore)]
     fn assert_exists() {
         let wrapper = mount_test(|| {
             view! { <span id="existent">this exists</span> }
