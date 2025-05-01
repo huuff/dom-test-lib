@@ -52,7 +52,7 @@ macro_rules! mount_i18n_test {
     };
 }
 
-#[cfg(all(test, target_family = "wasm"))]
+#[cfg(test)]
 mod test {
     use super::*;
     use leptos::view;
@@ -60,7 +60,8 @@ mod test {
 
     wasm_bindgen_test_configure!(run_in_browser);
 
-    #[wasm_bindgen_test]
+    #[wasm_bindgen_test(unsupported = test)]
+    #[cfg_attr(not(target_family = "wasm"), ignore)]
     fn actually_mounts_it() {
         let test_wrapper = mount_test(|| {
             view! { <span id="mounted-span">hi</span> }

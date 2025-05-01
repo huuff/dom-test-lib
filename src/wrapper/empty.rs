@@ -147,7 +147,7 @@ impl_query_as!(
     label => web_sys::HtmlLabelElement,
 );
 
-#[cfg(all(test, target_family = "wasm"))]
+#[cfg(test)]
 mod tests {
     use leptos::prelude::*;
     use wasm_bindgen_test::*;
@@ -156,7 +156,8 @@ mod tests {
 
     wasm_bindgen_test_configure!(run_in_browser);
 
-    #[wasm_bindgen_test]
+    #[wasm_bindgen_test(unsupported = test)]
+    #[cfg_attr(not(target_family = "wasm"), ignore)]
     fn query_as_input() {
         let wrapper = mount_test(|| {
             view! { <input id="input" value="test" /> }
@@ -167,7 +168,8 @@ mod tests {
         assert_eq!(input.value(), "test");
     }
 
-    #[wasm_bindgen_test]
+    #[wasm_bindgen_test(unsupported = test)]
+    #[cfg_attr(not(target_family = "wasm"), ignore)]
     fn find_by_text_exact() {
         let wrapper = mount_test(|| {
             view! {
@@ -188,7 +190,8 @@ mod tests {
         assert_eq!(target.id(), "found");
     }
 
-    #[wasm_bindgen_test]
+    #[wasm_bindgen_test(unsupported = test)]
+    #[cfg_attr(not(target_family = "wasm"), ignore)]
     fn query_all_spans() {
         let wrapper = mount_test(|| {
             view! {
