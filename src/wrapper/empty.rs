@@ -2,7 +2,7 @@ use wasm_bindgen::JsCast as _;
 
 use crate::{framework::Framework, util::NodeListExt};
 
-use super::{many::Many, single::Single, Maybe, TestWrapper, TestWrapperState};
+use super::{Maybe, TestWrapper, TestWrapperState, many::Many, single::Single};
 
 /// The initial state for a [`TestWrapper`]: no element has been selected yet
 pub struct Empty;

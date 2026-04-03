@@ -12,14 +12,15 @@ impl<E: Into<web_sys::Element> + Clone, Fw: Framework> TestWrapper<Single<E>, Fw
     }
 
     pub fn assert_text_contains(&self, expected: &str) -> &Self {
-        assert!(self
-            .state
-            .0
-            .clone()
-            .into()
-            .text_content()
-            .unwrap()
-            .contains(expected));
+        assert!(
+            self.state
+                .0
+                .clone()
+                .into()
+                .text_content()
+                .unwrap()
+                .contains(expected)
+        );
         self
     }
 

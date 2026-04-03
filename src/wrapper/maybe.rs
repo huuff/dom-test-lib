@@ -1,6 +1,6 @@
 use crate::framework::Framework;
 
-use super::{single::Single, TestWrapper, TestWrapperState};
+use super::{TestWrapper, TestWrapperState, single::Single};
 
 /// A wrapper in an indeterminate state: it may hold an element or it may not,
 /// you have to assert on it to pass to a determinate state

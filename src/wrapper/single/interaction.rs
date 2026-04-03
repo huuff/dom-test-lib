@@ -64,7 +64,7 @@ impl<Fw: Framework, Elem: AsRef<HtmlElement>> TestWrapper<Single<Elem>, Fw> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, target_family = "wasm"))]
 mod tests {
     use std::sync::{Arc, Mutex};
 
@@ -74,8 +74,7 @@ mod tests {
 
     wasm_bindgen_test_configure!(run_in_browser);
 
-    #[wasm_bindgen_test(unsupported = tokio::test)]
-    #[cfg_attr(not(target_family = "wasm"), ignore)]
+    #[wasm_bindgen_test]
     async fn selects_option() {
         let wrapper = mount_test(|| {
             view! {
@@ -99,8 +98,8 @@ mod tests {
         assert_eq!(select.value(), "2");
     }
 
-    #[wasm_bindgen_test(unsupported = tokio::test)]
-    #[cfg_attr(not(target_family = "wasm"), ignore)]
+    #[wasm_bindgen_test]
+    #[should_panic]
     async fn select_panics_on_not_found() {
         let wrapper = mount_test(|| {
             view! {
@@ -120,8 +119,7 @@ mod tests {
             .await;
     }
 
-    #[wasm_bindgen_test(unsupported = tokio::test)]
-    #[cfg_attr(not(target_family = "wasm"), ignore)]
+    #[wasm_bindgen_test]
     async fn change_value() {
         // ARRANGE
         let change_called = Arc::new(Mutex::new(String::default()));
@@ -159,8 +157,7 @@ mod tests {
         assert_eq!(*change_called.lock().unwrap(), "newvalue");
     }
 
-    #[wasm_bindgen_test(unsupported = tokio::test)]
-    #[cfg_attr(not(target_family = "wasm"), ignore)]
+    #[wasm_bindgen_test]
     async fn click_clicks() {
         use std::sync::atomic::{AtomicBool, Ordering};
 

@@ -1,6 +1,6 @@
 use crate::{
     framework::Framework,
-    wrapper::{maybe::Maybe, TestWrapper},
+    wrapper::{TestWrapper, maybe::Maybe},
 };
 
 use super::Single;
